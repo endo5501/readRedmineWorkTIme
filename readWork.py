@@ -22,19 +22,22 @@ for t in time_entries:
   act_table={}
   spent_table={}
   hours = 0
-  #spent_list作成
-  #if not t.spent_on in spent_list:
-  #  spent_list.append(t.spent_on)
-  #issue_tableデータ構造作成
-  if t.issue.id in issue_table:
-    act_table = issue_table[t.issue.id]
+  
+  issue = redmine.issue.get(t.issue.id)
+  main_key = "#" + str(t.issue.id)
+  for c in issue.custom_fields:
+    if c.id == 1 and c.value != '':
+      main_key = "E"+c.value
+
+  if main_key in issue_table:
+    act_table = issue_table[main_key]
   if t.activity.id in act_table:
     spent_table = act_table[t.activity.id]
   if t.spent_on in spent_table:
     hours = spent_table[t.spent_on]
   spent_table[t.spent_on] = hours + t.hours
   act_table[t.activity.id] = spent_table
-  issue_table[t.issue.id] = act_table
+  issue_table[main_key] = act_table
 
 #print(issue_table)
 #for issue,act_table in issue_table.items():
