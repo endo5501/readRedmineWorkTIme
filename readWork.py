@@ -18,7 +18,6 @@ for i in range(0,30):
 
 
 for t in time_entries:
-  #print('issue_id:{0},spend_on:{1},hours:{2},activity_id:{3}'.format(t.issue,t.spent_on,t.hours,t.activity))
   act_table={}
   spent_table={}
   hours = 0
@@ -57,9 +56,6 @@ for issue,act_table in issue_table.items():
 print("")
 
 print('activity,',end="")
-#for issue,act_table in issue_table.items():
-#  for act,spent_table in act_table.items():
-#    print('{0},'.format(act),end="")
 for issue,act_table in issue_table.items():
   for i in range(8,13):
     print('{0},'.format(i),end="")
@@ -78,14 +74,4 @@ for s in spent_list:
           print('0,',end="")
       else:
         print('0,',end="")
-      #if a in act_table:
-        #spent_table = act_table[a]
-        
-        #  print('{0},'.format(
-    #for act,spent_table in act_table.items():
-    #  for spent,hour in spent_table.items():
-    #    if spent==s:
-    #      print('{0},'.format(hour),end="")
-    #    else:
-    #      print('0,',end="")
   print("")
