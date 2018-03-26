@@ -42,36 +42,39 @@ for d in range(max_day):
 
 #工数データ取得
 issue_table={}
-time_entries = redmine.time_entry.filter(user_id = user_id, fome_date = from_date, to_date = to_date)
 
-for t in time_entries:
-  act_table={}
-  spent_table={}
-  hours = 0
+for d in spent_list:
+  time_entries = redmine.time_entry.filter(user_id = user_id, spent_on=d)
   
-  issue = redmine.issue.get(t.issue.id)
-  main_key = "#" + str(t.issue.id)
-  for c in issue.custom_fields:
-    if c.id == 1 and c.value != '':
-      main_key = "E"+c.value
-  if main_key in issue_table:
-    act_table = issue_table[main_key]
-  if t.activity.id in act_table:
-    spent_table = act_table[t.activity.id]
-  if t.spent_on in spent_table:
-    hours = spent_table[t.spent_on]
-  spent_table[t.spent_on] = hours + t.hours
-  act_table[t.activity.id] = spent_table
-  issue_table[main_key] = act_table
+  for t in time_entries:
+    act_table={}
+    spent_table={}
+    hours = 0
+    
+    issue = redmine.issue.get(t.issue.id)
+    main_key = "#" + str(t.issue.id)
+    for c in issue.custom_fields:
+      if c.id == 1 and c.value != '':
+        main_key = "E"+c.value
+    if main_key in issue_table:
+      act_table = issue_table[main_key]
+    if t.activity.id in act_table:
+      spent_table = act_table[t.activity.id]
+    if t.spent_on in spent_table:
+      hours = spent_table[t.spent_on]
+    spent_table[t.spent_on] = hours + t.hours
+    act_table[t.activity.id] = spent_table
+    issue_table[main_key] = act_table
 
-print(issue_table)
-for issue,act_table in issue_table.items():
-  print(issue)
-  for act,spent_table in act_table.items():
-    print('\t{0}'.format(act))
-    for spent,hour in spent_table.items():
-      print('\t\t{0}'.format(spent))
-      print('\t\t{0}'.format(hour))
+#デバッグ用出力
+#print(issue_table)
+#for issue,act_table in issue_table.items():
+#  print(issue)
+#  for act,spent_table in act_table.items():
+#    print('\t{0}'.format(act))
+#    for spent,hour in spent_table.items():
+#      print('\t\t{0}'.format(spent))
+#      print('\t\t{0}'.format(hour))
 
 
 #CSV出力
