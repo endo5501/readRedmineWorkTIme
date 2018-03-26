@@ -23,6 +23,9 @@ if args.user_id==None:
 else:
   user_id = args.user_id
 
+#活動一覧
+activity_list = list(redmine.enumeration.filter(resource='time_entry_activities'))
+
 #集計期間
 spent_list=[]
 if args.date==None:
@@ -32,7 +35,6 @@ else:
   from_date = datetime.date(tmp_date.year,tmp_date.month,tmp_date.day)
 
 max_day = calendar.monthrange(from_date.year,from_date.month)[1]
-to_date = from_date + datetime.timedelta(max_day-1)
 
 
 for d in range(max_day):
@@ -76,27 +78,27 @@ for d in spent_list:
 
 
 #CSV出力
-print('issue,',end="")
+print('issues,',end="")
 for issue,act_table in issue_table.items():
   act_num = len(act_table)
   print('{0}'.format(issue),end="")
-  for i in range(8,13):
+  for i in activity_list:
     print(',',end="")
 print("")
 
-print('activity,',end="")
+print('activities,',end="")
 for issue,act_table in issue_table.items():
-  for i in range(8,13):
-    print('{0},'.format(i),end="")
+  for a in activity_list:
+    print('{0},'.format(a),end="")
 print("")
 
 spent_list.sort()
 for s in spent_list:
   print('{0},'.format(s),end="")
   for issue,act_table in issue_table.items():
-    for a in range(8,13):
-      if a in act_table:
-        spent_table = act_table[a]
+    for a in activity_list:
+      if a.id in act_table:
+        spent_table = act_table[a.id]
         if s in spent_table:
           print('{0},'.format(spent_table[s]),end="")
         else:
