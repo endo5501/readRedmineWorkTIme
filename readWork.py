@@ -53,7 +53,7 @@ for d in spent_list:
     main_key = "#" + str(t.issue.id)
     for c in issue.custom_fields:
       if c.id == 1 and c.value != '':
-        main_key = "E"+c.value
+        main_key = "E"+c.value.zfill(5)
     if main_key in issue_table:
       act_table = issue_table[main_key]
     if t.activity.id in act_table:
