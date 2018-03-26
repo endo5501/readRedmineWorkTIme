@@ -1,21 +1,48 @@
 #_ -*- coding: utf-8 -*-
-
+import sys
 import datetime
+import calendar
+import argparse
 from redminelib import Redmine
 
-redmine = Redmine('http://localhost/redmine', key='6a2dd636ad3ee03f9f3d7d9fbb93346de3f32add')
+#引数読み取り
+parser = argparse.ArgumentParser(description='Redmineから工数情報を読み取り、csv形式で一月の結果を出力します')
+parser.add_argument('URL', help='RedmineのURL')
+parser.add_argument('API_KEY', help='RedmineのAPI key')
+parser.add_argument('--user_id',type=int, help='ユーザID(デフォルト:自分)')
+parser.add_argument('--date', help='出力する年/月(例:2018/03,デフォルト:今月)')
+args = parser.parse_args()
 
-time_entries = redmine.time_entry.all()
+#redmine接続
+redmine = Redmine(args.URL, key=args.API_KEY)
 
+#対象ユーザ
+if args.user_id==None:
+  user = redmine.user.get('current')
+  user_id = user.id
+else:
+  user_id = args.user_id
 
-issue_table={}
+#集計期間
 spent_list=[]
+if args.date==None:
+  from_date = datetime.date.today().replace(day=1)
+else:
+  tmp_date = datetime.datetime.strptime(args.date,'%Y/%m')
+  from_date = datetime.date(tmp_date.year,tmp_date.month,tmp_date.day)
 
-base = datetime.date(2018,3,1)
-for i in range(0,30):
-  d = base + datetime.timedelta(i)
-  spent_list.append(d)
+max_day = calendar.monthrange(from_date.year,from_date.month)[1]
+to_date = from_date + datetime.timedelta(max_day-1)
 
+print(from_date)
+print(to_date)
+
+for d in range(max_day):
+  spent_list.append(from_date + datetime.timedelta(d))
+
+#工数データ取得
+issue_table={}
+time_entries = redmine.time_entry.filter(user_id = user_id, fome_date = from_date, to_date = to_date)
 
 for t in time_entries:
   act_table={}
@@ -27,7 +54,6 @@ for t in time_entries:
   for c in issue.custom_fields:
     if c.id == 1 and c.value != '':
       main_key = "E"+c.value
-
   if main_key in issue_table:
     act_table = issue_table[main_key]
   if t.activity.id in act_table:
@@ -38,15 +64,17 @@ for t in time_entries:
   act_table[t.activity.id] = spent_table
   issue_table[main_key] = act_table
 
-#print(issue_table)
-#for issue,act_table in issue_table.items():
-#  print(issue)
-#  for act,spent_table in act_table.items():
-#    print('\t{0}'.format(act))
-#    for spent,hour in spent_table.items():
-#      print('\t\t{0}'.format(spent))
-#      print('\t\t{0}'.format(hour))
+print(issue_table)
+for issue,act_table in issue_table.items():
+  print(issue)
+  for act,spent_table in act_table.items():
+    print('\t{0}'.format(act))
+    for spent,hour in spent_table.items():
+      print('\t\t{0}'.format(spent))
+      print('\t\t{0}'.format(hour))
 
+
+#CSV出力
 print('issue,',end="")
 for issue,act_table in issue_table.items():
   act_num = len(act_table)
