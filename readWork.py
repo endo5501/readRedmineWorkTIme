@@ -34,8 +34,6 @@ else:
 max_day = calendar.monthrange(from_date.year,from_date.month)[1]
 to_date = from_date + datetime.timedelta(max_day-1)
 
-print(from_date)
-print(to_date)
 
 for d in range(max_day):
   spent_list.append(from_date + datetime.timedelta(d))
